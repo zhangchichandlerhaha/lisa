@@ -1,6 +1,9 @@
 # LISA Crazy Eights
 
 A high-performance, interactive Crazy Eights card game built with React, Tailwind CSS, and Framer Motion.
+A fully-featured, responsive puzzle game where you eliminate blocks by summing numbers to reach target values. Works seamlessly on mobile and desktop devices.
+一个功能完整、响应式布局（适配手机和电脑）的数字消除类益智游戏，核心玩法是数学求和消除
+
 
 ## 🚀 Deployment to Vercel
 
