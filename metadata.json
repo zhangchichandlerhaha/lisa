@@ -1,0 +1,5 @@
+{
+  "name": "LISA Crazy Eights",
+  "description": "A high-performance, interactive Crazy Eights card game built with React and Tailwind CSS. Play against a smart AI in this classic card game.",
+  "requestFramePermissions": []
+}

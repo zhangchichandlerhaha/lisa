@@ -1,11 +1,39 @@
-<div align="center">
+# LISA Crazy Eights
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A high-performance, interactive Crazy Eights card game built with React, Tailwind CSS, and Framer Motion.
 
-  <h1>Built with AI Studio</h2>
+## 🚀 Deployment to Vercel
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+To deploy this project to Vercel, follow these steps:
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+### 1. Push to GitHub
+1. Create a new repository on [GitHub](https://github.com/new).
+2. Initialize your local directory as a git repository:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   ```
+3. Connect to your GitHub repository:
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   git branch -M main
+   git push -u origin main
+   ```
 
-</div>
+### 2. Deploy to Vercel
+1. Go to the [Vercel Dashboard](https://vercel.com/dashboard).
+2. Click **"Add New..."** and select **"Project"**.
+3. Import your GitHub repository.
+4. **Environment Variables**:
+   - Add `GEMINI_API_KEY` with your Google AI API Key.
+5. Click **"Deploy"**.
+
+Vercel will automatically detect the Vite configuration and build the project.
+
+## 🛠 Tech Stack
+- **Framework**: React 19
+- **Styling**: Tailwind CSS 4
+- **Animations**: Framer Motion (motion/react)
+- **Icons**: Lucide React
+- **Build Tool**: Vite
