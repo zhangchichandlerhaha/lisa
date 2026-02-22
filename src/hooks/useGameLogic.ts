@@ -9,7 +9,6 @@ export const useGameLogic = () => {
     const playerHand = deck.splice(0, INITIAL_HAND_SIZE);
     const aiHand = deck.splice(0, INITIAL_HAND_SIZE);
     
-    // Initial discard must not be an 8 for simplicity in first turn
     let firstDiscardIndex = 0;
     while (deck[firstDiscardIndex].rank === '8') {
       firstDiscardIndex++;
@@ -24,17 +23,50 @@ export const useGameLogic = () => {
       currentSuit: discardPile[0].suit,
       currentRank: discardPile[0].rank,
       turn: 'player',
-      status: 'playing',
+      status: 'home',
       winner: null,
+      scores: { player: 0, ai: 0 },
+      round: 1,
+      lastAction: null,
     };
   });
 
+  const startGame = () => {
+    setState(prev => ({ ...prev, status: 'playing' }));
+  };
+
+  const goHome = () => {
+    setState(prev => ({ ...prev, status: 'home' }));
+  };
+
+  const calculateScore = (hand: Card[]) => {
+    return hand.reduce((total, card) => {
+      if (card.rank === '8') return total + 50;
+      if (['K', 'Q', 'J'].includes(card.rank)) return total + 10;
+      if (card.rank === 'A') return total + 1;
+      return total + parseInt(card.rank === '10' ? '10' : card.rank);
+    }, 0);
+  };
+
   const checkWinner = useCallback((newState: GameState) => {
-    if (newState.playerHand.length === 0) {
-      return { ...newState, status: 'game_over' as const, winner: 'player' as const };
-    }
-    if (newState.aiHand.length === 0) {
-      return { ...newState, status: 'game_over' as const, winner: 'ai' as const };
+    if (newState.playerHand.length === 0 || newState.aiHand.length === 0 || (newState.deck.length === 0 && !newState.playerHand.find(c => c.rank === '8' || c.suit === newState.currentSuit || c.rank === newState.currentRank) && !newState.aiHand.find(c => c.rank === '8' || c.suit === newState.currentSuit || c.rank === newState.currentRank))) {
+      const playerScore = calculateScore(newState.playerHand);
+      const aiScore = calculateScore(newState.aiHand);
+      
+      let winner: Turn | null = null;
+      if (newState.playerHand.length === 0) winner = 'player';
+      else if (newState.aiHand.length === 0) winner = 'ai';
+      else winner = playerScore < aiScore ? 'player' : 'ai';
+
+      return { 
+        ...newState, 
+        status: 'game_over' as const, 
+        winner,
+        scores: {
+          player: newState.scores.player + (winner === 'player' ? aiScore : 0),
+          ai: newState.scores.ai + (winner === 'ai' ? playerScore : 0),
+        }
+      };
     }
     return newState;
   }, []);
@@ -46,8 +78,11 @@ export const useGameLogic = () => {
 
   const drawCard = (turn: Turn) => {
     if (state.deck.length === 0) {
-      // Skip turn if deck is empty
-      setState(prev => ({ ...prev, turn: prev.turn === 'player' ? 'ai' : 'player' }));
+      setState(prev => ({ 
+        ...prev, 
+        turn: prev.turn === 'player' ? 'ai' : 'player',
+        lastAction: `${turn.toUpperCase()} skipped (No cards in deck)`
+      }));
       return;
     }
 
@@ -58,9 +93,10 @@ export const useGameLogic = () => {
         ...prev,
         deck: newDeck,
         [turn === 'player' ? 'playerHand' : 'aiHand']: [...prev[turn === 'player' ? 'playerHand' : 'aiHand'], drawnCard],
-        turn: turn === 'player' ? 'ai' : 'player'
+        turn: turn === 'player' ? 'ai' : 'player',
+        lastAction: `${turn.toUpperCase()} drew a card`
       };
-      return newState;
+      return checkWinner(newState);
     });
   };
 
@@ -77,7 +113,6 @@ export const useGameLogic = () => {
         if (turn === 'player') {
           nextStatus = 'choosing_suit';
         } else {
-          // AI logic for choosing suit (most frequent suit in hand)
           const suitCounts = newHand.reduce((acc, c) => {
             acc[c.suit] = (acc[c.suit] || 0) + 1;
             return acc;
@@ -91,6 +126,7 @@ export const useGameLogic = () => {
             currentSuit: bestSuit,
             currentRank: card.rank,
             turn: 'player' as const,
+            lastAction: `AI played 8 and chose ${bestSuit}`
           };
           return checkWinner(newState);
         }
@@ -104,6 +140,7 @@ export const useGameLogic = () => {
         currentRank: card.rank,
         turn: turn === 'player' ? 'ai' : 'player' as const,
         status: nextStatus,
+        lastAction: `${turn.toUpperCase()} played ${card.rank} of ${card.suit}`
       };
       
       return checkWinner(newState);
@@ -144,7 +181,8 @@ export const useGameLogic = () => {
     }
     const discardPile = [deck.splice(firstDiscardIndex, 1)[0]];
 
-    setState({
+    setState(prev => ({
+      ...prev,
       deck,
       playerHand,
       aiHand,
@@ -154,7 +192,9 @@ export const useGameLogic = () => {
       turn: 'player',
       status: 'playing',
       winner: null,
-    });
+      round: prev.round + 1,
+      lastAction: 'New Round Started'
+    }));
   };
 
   return {
@@ -163,6 +203,8 @@ export const useGameLogic = () => {
     drawCard,
     selectSuit,
     restartGame,
-    isValidMove
+    isValidMove,
+    startGame,
+    goHome
   };
 };

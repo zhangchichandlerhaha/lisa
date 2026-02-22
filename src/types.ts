@@ -8,7 +8,7 @@ export interface Card {
   rank: Rank;
 }
 
-export type GameStatus = 'playing' | 'choosing_suit' | 'game_over';
+export type GameStatus = 'home' | 'playing' | 'choosing_suit' | 'game_over';
 export type Turn = 'player' | 'ai';
 
 export interface GameState {
@@ -21,4 +21,10 @@ export interface GameState {
   turn: Turn;
   status: GameStatus;
   winner: Turn | null;
+  scores: {
+    player: number;
+    ai: number;
+  };
+  round: number;
+  lastAction: string | null;
 }
